@@ -1,0 +1,17 @@
+minikube start --driver=virtualbox --no-vtx-check
+minikube dashboard
+
+kubectl create deployment main-server --image=87625155/master-poc-node
+kubectl expose deployment main-server --type=LoadBalancer --port=8000
+minikube service main-server
+
+kubectl create deployment py-server --image=87625155/master-poc-py
+kubectl expose deployment py-server --type=LoadBalancer --port=5000
+minikube service py-server
+
+minikube tunnel
+
+minikube ssh
+curl 10.100.140.59:5000
+
+minikube stop
