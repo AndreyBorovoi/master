@@ -6,7 +6,6 @@ import { User, UserDocument } from '../schemas/user.schema';
 import * as randomstring from 'randomstring';
 import * as fetch from 'node-fetch';
 import { K8sApi } from './K8sApi';
-import { writeFileSync } from 'fs';
 
 function randomPort() {
   let rand = 1 + Math.random() * 65535;
@@ -27,7 +26,7 @@ export class AiserviceService {
 
   async test() {}
 
-  private async generateModelId(){
+  private async generateModelId() {
     let modelId: string;
     do {
       modelId = randomstring.generate({
@@ -37,28 +36,36 @@ export class AiserviceService {
       });
     } while (await this.getAIServiceByModelId(modelId));
 
-    return modelId
+    return modelId;
   }
 
-  async create(token: string, description?: string) {
+  async create(token: string, model: Buffer, description?: string) {
     const user = await this.getUserByToken(token);
     this.checkUser(user);
-    const modelId = await this.generateModelId()
+    const modelId = await this.generateModelId();
     const port = randomPort();
 
     const aiservice = new this.aiServiceModel({
       owner: user,
+      model: model,
       modelId,
       description: description || '',
       port,
     });
 
     await aiservice.save();
+
     const { deployment, service } = await this.k8sApi.createAIService(
       modelId,
       port,
     );
-    return { modelId: aiservice.modelId, port, deployment, service };
+
+    return {
+      modelId: aiservice.modelId,
+      port,
+      deployment,
+      service,
+    };
   }
 
   async getAIServices(token: string) {
@@ -73,12 +80,9 @@ export class AiserviceService {
     });
   }
 
-  async loadModel(modelId: string, token: string, file: Buffer) {
-    console.log(modelId);
-    console.log(token);
-    console.log(file);
-    writeFileSync('model', file)
-  }
+  // async loadModel(modelId: string, token: string, file: Buffer) {
+  //   writeFileSync('model', file)
+  // }
 
   async request(modelId: string) {
     const aiService = await this.getAIServiceByModelId(modelId);

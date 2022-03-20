@@ -1,8 +1,16 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { PermissionsDto, CreateServiceDto } from './dto/aisecvice.dto';
 import { AiserviceService } from './aiservice.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-
 
 @Controller('aiservice')
 export class AiserviceController {
@@ -14,8 +22,24 @@ export class AiserviceController {
   }
 
   @Post('create')
-  async crete(@Body() { token, description }: CreateServiceDto) {
-    const modelData = await this.aiserviceService.create(token, description);
+  @UseInterceptors(FileInterceptor('model'))
+  async create(
+    @Body() { token, description }: CreateServiceDto,
+    @UploadedFile() model: Express.Multer.File,
+  ) {
+    if (!model) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'add model',
+        error: 'Bad Request',
+      };
+    }
+
+    const modelData = await this.aiserviceService.create(
+      token,
+      model.buffer,
+      description,
+    );
     return { ...modelData, status: HttpStatus.CREATED };
   }
 
@@ -25,15 +49,15 @@ export class AiserviceController {
     return { services, status: HttpStatus.OK };
   }
 
-  @Post('load_model/:modelId')
-  @UseInterceptors(FileInterceptor('file'))
-  async loadModel(
-    @Param('modelId') modelId: string,
-    @Body() { token }: PermissionsDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    const response = await this.aiserviceService.loadModel(modelId, token, file.buffer)
-  }
+  // @Post('load_model/:modelId')
+  // @UseInterceptors(FileInterceptor('file'))
+  // async loadModel(
+  //   @Param('modelId') modelId: string,
+  //   @Body() { token }: PermissionsDto,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   const response = await this.aiserviceService.loadModel(modelId, token, file.buffer)
+  // }
 
   @Get('request/:modelId')
   async request(@Param('modelId') modelId: string) {
@@ -59,4 +83,3 @@ export class AiserviceController {
     @Body() { token }: PermissionsDto,
   ) {}
 }
-

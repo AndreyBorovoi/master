@@ -16,17 +16,17 @@ export class K8sApi {
     this.k8sApiNode = this.kc.makeApiClient(k8s.NodeV1Api);
   }
 
-  async createAIService(name: string, port: number) {
-    const deployment = await this.createDeployment(name, port);
-    const service = await this.creteService(name, port);
+  async createAIService(modelId: string, port: number) {
+    const deployment = await this.createDeployment(modelId, port);
+    const service = await this.creteService(modelId, port);
     return { deployment, service };
   }
 
-  private async createDeployment(name: string, port: number) {
+  private async createDeployment(modelId: string, port: number) {
     const deployment = this.k8sApiApps
       .createNamespacedDeployment(
         'default',
-        createPyDeployment(name, port),
+        createPyDeployment(modelId, port),
         'true',
       )
       .then((value) => {
@@ -38,9 +38,13 @@ export class K8sApi {
     return deployment;
   }
 
-  private async creteService(name: string, port: number) {
+  private async creteService(modelId: string, port: number) {
     const service = this.k8sApi
-      .createNamespacedService('default', createPyService(name, port), 'true')
+      .createNamespacedService(
+        'default',
+        createPyService(modelId, port),
+        'true',
+      )
       .then((value) => {
         return value.body;
       })

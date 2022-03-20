@@ -13,6 +13,9 @@ export class AIService {
   @Prop({ required: true, unique: true })
   modelId: string;
 
+  @Prop({ required: true, unique: false })
+  model: Buffer;
+
   @Prop()
   description: string;
 

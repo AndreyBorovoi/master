@@ -1,22 +1,22 @@
 import * as k8s from '@kubernetes/client-node';
 
-export const createPyDeployment = (name: string, port: number) => {
+export const createPyDeployment = (modelId: string, port: number) => {
   const PyDeployment: k8s.V1Deployment = {
     apiVersion: 'apps/v1',
     kind: 'Deployment',
     metadata: {
-      name: name,
+      name: modelId,
     },
     spec: {
       selector: {
         matchLabels: {
-          app: name,
+          app: modelId,
         },
       },
       template: {
         metadata: {
           labels: {
-            app: name,
+            app: modelId,
           },
         },
         spec: {
@@ -27,7 +27,10 @@ export const createPyDeployment = (name: string, port: number) => {
               command: ['gunicorn'],
               args: ['-b', `0.0.0.0:${port}`, '-w', '1', 'server:app'],
               ports: [{ containerPort: port }],
-              env: [{ name: 'PORT', value: `${port}` }],
+              env: [
+                { name: 'PORT', value: `${port}` },
+                { name: 'MODELID', value: `${modelId}` },
+              ],
             },
           ],
         },
@@ -38,12 +41,12 @@ export const createPyDeployment = (name: string, port: number) => {
   return PyDeployment;
 };
 
-export const createPyService = (name: string, port: number) => {
+export const createPyService = (modelId: string, port: number) => {
   const PyService: k8s.V1Service = {
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
-      name: name,
+      name: modelId,
     },
     spec: {
       ports: [
@@ -53,7 +56,7 @@ export const createPyService = (name: string, port: number) => {
         },
       ],
       selector: {
-        app: name,
+        app: modelId,
       },
       type: 'LoadBalancer',
     },
