@@ -1,6 +1,26 @@
 from flask import Flask
 from flask import request
+
+from pymongo import MongoClient
+
+import pickle
 import os
+
+
+CONNECTION_STRING = "mongodb+srv://testuser:testuser@cluster0.og9pt.mongodb.net/MainApi?retryWrites=true&w=majority"
+mongo = MongoClient(CONNECTION_STRING)
+mainApiDB = mongo['MainApi']
+aiservicesCollection = mainApiDB['aiservices']
+
+# modelId = os.environ['MODELID']
+modelId = 'vxgjdqwtip'
+service = aiservicesCollection.find_one({"modelId": modelId})
+
+with open('model', 'wb') as f:
+	f.write(service['model'])
+
+loaded_model = pickle.load(open('model', 'rb'))
+print(loaded_model.coef_)
 
 app = Flask(__name__)
 

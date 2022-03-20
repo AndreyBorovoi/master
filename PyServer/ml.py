@@ -10,5 +10,7 @@ y = [i[0] + i[1] + random() for i in x]
 # print(y)
 model.fit(x, y)
 print(model.coef_)
-with open('model', 'wb') as f:
-  s = pickle.dump(model, f)
+pickle.dump(model, open('model', 'wb'))
+
+loaded_model = pickle.load(open('model', 'rb'))
+print(loaded_model.coef_)
