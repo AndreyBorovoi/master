@@ -9,5 +9,6 @@ RUN pip install -r requirements.txt
 RUN pip install gunicorn
 
 ENV PORT ${PORT}
+ENV MODELID ${MODELID}
 
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "-w", "1", "server:app"]
+# CMD ["gunicorn", "-b", "0.0.0.0:5000", "-w", "1", "server:app"]
