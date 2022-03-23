@@ -1,10 +1,16 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+
 import { AIService, AIServiceDocument } from '../schemas/aiservice.schema';
 import { User, UserDocument } from '../schemas/user.schema';
+
+import { RedisService } from '../redis/redis.service';
+
 import * as randomstring from 'randomstring';
 import * as fetch from 'node-fetch';
+
 import { K8sApi } from './K8sApi';
 
 function randomPort() {
@@ -20,6 +26,7 @@ export class AiserviceService {
     @InjectModel(AIService.name)
     private aiServiceModel: Model<AIServiceDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private redisService: RedisService,
   ) {
     this.k8sApi = new K8sApi();
   }

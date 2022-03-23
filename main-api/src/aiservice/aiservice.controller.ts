@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { PermissionsDto, CreateServiceDto } from './dto/aisecvice.dto';
 import { AiserviceService } from './aiservice.service';
+
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('aiservice')

@@ -4,14 +4,15 @@ import { AIService, AIServiceSchema } from '../schemas/aiservice.schema';
 import { User, UserSchema } from '../schemas/user.schema';
 import { AiserviceController } from './aiservice.controller';
 import { AiserviceService } from './aiservice.service';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: AIService.name, schema: AIServiceSchema },
-      // { name: User.name, schema: UserSchema },
     ]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    RedisModule,
   ],
   controllers: [AiserviceController],
   providers: [AiserviceService],

@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AiserviceModule } from './aiservice/aiservice.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { AiserviceModule } from './aiservice/aiservice.module';
     ),
     UserModule,
     AiserviceModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
