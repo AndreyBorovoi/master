@@ -1,38 +1,50 @@
-from flask import Flask
-from flask import request
-
 from pymongo import MongoClient
-
+import redis
 import pickle
 import os
+import json
 
+if 'MODELID' in os.environ.keys():
+	modelId = os.environ['MODELID']
+else:
+	modelId = 'vxgjdqwtip'
 
-CONNECTION_STRING = "mongodb+srv://testuser:testuser@cluster0.og9pt.mongodb.net/MainApi?retryWrites=true&w=majority"
-mongo = MongoClient(CONNECTION_STRING)
+if 'MONGODB' in os.environ.keys():
+	connectionString = os.environ['MONGODB']
+else:
+	connectionString = 'mongodb+srv://testuser:testuser@cluster0.og9pt.mongodb.net/MainApi?retryWrites=true&w=majority'
+
+if 'REDIS_URL' in os.environ.keys():
+	redisUrl = os.environ['REDIS_URL']
+else:
+	redisUrl = 'localhost'
+
+if 'REDIS_PORT' in os.environ.keys():
+	redisPort = os.environ['REDIS_PORT']
+else:
+	redisPort = '6379'
+
+mongo = MongoClient(connectionString)
 mainApiDB = mongo['MainApi']
 aiservicesCollection = mainApiDB['aiservices']
-
-# modelId = os.environ['MODELID']
-modelId = 'vxgjdqwtip'
 service = aiservicesCollection.find_one({"modelId": modelId})
 
 with open('model', 'wb') as f:
 	f.write(service['model'])
 
-loaded_model = pickle.load(open('model', 'rb'))
-print(loaded_model.coef_)
+model = pickle.load(open('model', 'rb'))
 
-app = Flask(__name__)
+redisClient = redis.Redis(redisUrl, redisPort)
 
-if 'PORT' in os.environ.keys():
-	PORT = os.environ['PORT']
-else:
-	PORT = 5000
+print('ready')
 
-@app.route('/', methods=['GET'])
-def main():
-  return {'params': request.json, 'port': PORT}
-
-
-if __name__ == '__main__':
-	app.run(debug=True, host='0.0.0.0', port=PORT)
+while(True):
+	data_byte = redisClient.blpop(f'request-{modelId}', 0)[1]
+	print(data_byte)
+	data_str = data_byte.decode('utf-8')
+	print(data_str)
+	data = json.loads(data_str)
+	print(data)
+	predict = model.predict(data)
+	print(predict)
+	redisClient.rpush(f'response-{modelId}', json.dumps(predict.tolist()))

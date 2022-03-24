@@ -14,3 +14,5 @@ pickle.dump(model, open('model', 'wb'))
 
 loaded_model = pickle.load(open('model', 'rb'))
 print(loaded_model.coef_)
+
+print(model.predict([[2,3], [1,1], [5,5]]))
