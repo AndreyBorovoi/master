@@ -12,11 +12,19 @@ export class RedisService {
 		this.client.connect();
 	}
 
-	async set(key: any, value: any) {
+	async set(key: string, value: any) {
 		return this.client.set(key, value);
 	}
 
-	async get(key: any) {
+	async get(key: string) {
 		return this.client.get(key);
+	}
+
+	async addToList(name: string, data: string) {
+		return this.client.LPUSH(name, data)
+	}
+
+	async popFromList(name: string) {
+		return this.client.BRPOP(name, 0)
 	}
 }

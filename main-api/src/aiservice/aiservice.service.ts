@@ -87,16 +87,18 @@ export class AiserviceService {
     });
   }
 
-  // async loadModel(modelId: string, token: string, file: Buffer) {
-  //   writeFileSync('model', file)
-  // }
+  async request(modelId: string, data: any[]) {
+    const requestId = randomstring.generate({
+      capitalization: 'lowercase',
+      length: 10,
+      charset: 'alphabetic',
+    });
+    console.log(`requests-${modelId}`, `request-${requestId}-${modelId}`);
 
-  async request(modelId: string) {
-    const aiService = await this.getAIServiceByModelId(modelId);
-    const port = aiService.port;
-
-    const response = await (await fetch(`http://127.0.0.1:${port}`)).json();
-    return response;
+    
+    this.redisService.addToList(`requests-${modelId}`, requestId)
+    this.redisService.addToList(`request-${requestId}-${modelId}`, JSON.stringify(data))
+    return this.redisService.popFromList(`response-${requestId}-${modelId}`);
   }
 
   async start(modelId: string, token: string) {}

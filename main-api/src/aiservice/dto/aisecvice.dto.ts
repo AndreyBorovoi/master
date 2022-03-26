@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsArray } from 'class-validator';
 
 export class PermissionsDto {
   @IsString()
@@ -10,3 +10,9 @@ export class CreateServiceDto extends PermissionsDto {
   @IsOptional()
   description?: string;
 }
+
+export class RequestDto
+ {
+   @IsArray()
+   data: any[]
+ }

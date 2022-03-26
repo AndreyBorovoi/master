@@ -3,15 +3,18 @@ import {
   Controller,
   Get,
   HttpStatus,
+  InternalServerErrorException,
   Param,
   Post,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { PermissionsDto, CreateServiceDto } from './dto/aisecvice.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+import { PermissionsDto, CreateServiceDto, RequestDto } from './dto/aisecvice.dto';
 import { AiserviceService } from './aiservice.service';
 
-import { FileInterceptor } from '@nestjs/platform-express';
+import { ResponseFromService } from './types'
 
 @Controller('aiservice')
 export class AiserviceController {
@@ -50,20 +53,30 @@ export class AiserviceController {
     return { services, status: HttpStatus.OK };
   }
 
-  // @Post('load_model/:modelId')
-  // @UseInterceptors(FileInterceptor('file'))
-  // async loadModel(
-  //   @Param('modelId') modelId: string,
-  //   @Body() { token }: PermissionsDto,
-  //   @UploadedFile() file: Express.Multer.File,
-  // ) {
-  //   const response = await this.aiserviceService.loadModel(modelId, token, file.buffer)
-  // }
-
   @Get('request/:modelId')
-  async request(@Param('modelId') modelId: string) {
-    const response = await this.aiserviceService.request(modelId);
-    return response;
+  async request(@Param('modelId') modelId: string, @Body() { data }: RequestDto) {
+    const response = await this.aiserviceService.request(modelId, data);
+
+    const element: ResponseFromService = JSON.parse(response.element)
+    
+    switch (element.status) {
+      case 'ok':
+        return {
+          'response': element.prediclion,
+          'time': element.time,
+          status: HttpStatus.OK,
+        }
+
+      case 'error':
+        return {
+          'error': element.error,
+          'time': element.time,
+          status: HttpStatus.BAD_REQUEST,
+        }
+    
+      default:
+        throw InternalServerErrorException
+    }
   }
 
   @Post('start/:modelId')
