@@ -3,6 +3,7 @@ import redis
 import pickle
 import os
 import json
+import time
 
 if 'MODELID' in os.environ.keys():
 	modelId = os.environ['MODELID']
@@ -27,24 +28,56 @@ else:
 mongo = MongoClient(connectionString)
 mainApiDB = mongo['MainApi']
 aiservicesCollection = mainApiDB['aiservices']
-service = aiservicesCollection.find_one({"modelId": modelId})
+service = aiservicesCollection.find_one({'modelId': modelId})
+
+
+if os.path.isfile('model'): 
+	os.remove('model')
 
 with open('model', 'wb') as f:
 	f.write(service['model'])
 
 model = pickle.load(open('model', 'rb'))
 
+if os.path.isfile('model'): 
+	os.remove('model')
+
 redisClient = redis.Redis(redisUrl, redisPort)
 
 print('ready')
 
 while(True):
-	data_byte = redisClient.blpop(f'request-{modelId}', 0)[1]
-	print(data_byte)
+	error = ''
+	print(f'requests-{modelId}')
+	request_id_byte = redisClient.blpop(f'requests-{modelId}', 0)[1]
+
+	start_time = time.time()
+
+	request_id = request_id_byte.decode('utf-8')
+	print(request_id)
+
+	try:
+		data_byte = redisClient.blpop(f'request-{request_id}-{modelId}', 2)[1]
+	except Exception as e:
+		responce = {'status': 'internal_error', 'error': 'data from redis is null'}
+		redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))
+		continue
+
 	data_str = data_byte.decode('utf-8')
-	print(data_str)
 	data = json.loads(data_str)
 	print(data)
-	predict = model.predict(data)
-	print(predict)
-	redisClient.rpush(f'response-{modelId}', json.dumps(predict.tolist()))
+
+	try:
+		predict = model.predict(data)
+		print(predict)
+	except Exception as e:
+		error = e.__str__()
+
+	delta = time.time() - start_time
+
+	if error:
+		responce = {'status': 'error', 'time': f'{delta} seconds', 'error': error}
+	else:
+		responce = {'status': 'ok', 'time': f'{delta} seconds', 'prediclion': predict.tolist()}
+
+	redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))
