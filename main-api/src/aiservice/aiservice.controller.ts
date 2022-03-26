@@ -73,6 +73,12 @@ export class AiserviceController {
           'time': element.time,
           status: HttpStatus.BAD_REQUEST,
         }
+      
+      case 'internal_error':
+        return {
+          'error': 'internal error',
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        }
     
       default:
         throw InternalServerErrorException
