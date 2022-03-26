@@ -1,7 +1,7 @@
-docker build -t master-poc-node .
-docker tag master-poc-node 87625155/master-poc-node
-docker push 87625155/master-poc-node
+docker build -t main-api .
+docker tag main-api 87625155/main-api
+docker push 87625155/main-api
 
-docker build -t master-poc-py .
-docker tag master-poc-py 87625155/master-poc-py
-docker push 87625155/master-poc-py
+docker build -t python-server .
+docker tag python-server 87625155/python-server
+docker push 87625155/python-server

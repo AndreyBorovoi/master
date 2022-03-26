@@ -1,12 +1,12 @@
-FROM python:3.10-alpine
+FROM python:3.10-slim
 
 ARG PORT=5000
 ARG ENV=docker
 COPY . .
 
-RUN pip install -r requirements.txt
+RUN python3 -m pip install -r requirements.txt
 
-RUN pip install gunicorn
+RUN python3 -m pip install gunicorn
 
 ENV PORT ${PORT}
 ENV MODELID ${MODELID}
