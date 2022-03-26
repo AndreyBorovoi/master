@@ -11,8 +11,7 @@ export class CreateServiceDto extends PermissionsDto {
   description?: string;
 }
 
-export class RequestDto
- {
-   @IsArray()
-   data: any[]
- }
+export class RequestDto {
+  @IsArray()
+  data: any[];
+}

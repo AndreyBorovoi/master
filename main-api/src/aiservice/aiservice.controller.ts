@@ -11,10 +11,14 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import { PermissionsDto, CreateServiceDto, RequestDto } from './dto/aisecvice.dto';
+import {
+  PermissionsDto,
+  CreateServiceDto,
+  RequestDto,
+} from './dto/aisecvice.dto';
 import { AiserviceService } from './aiservice.service';
 
-import { ResponseFromService } from './types'
+import { ResponseFromService } from './types';
 
 @Controller('aiservice')
 export class AiserviceController {
@@ -54,35 +58,45 @@ export class AiserviceController {
   }
 
   @Get('request/:modelId')
-  async request(@Param('modelId') modelId: string, @Body() { data }: RequestDto) {
+  async request(
+    @Param('modelId') modelId: string,
+    @Body() { data }: RequestDto,
+  ) {
     const response = await this.aiserviceService.request(modelId, data);
 
-    const element: ResponseFromService = JSON.parse(response.element)
-    
+    const element: ResponseFromService = JSON.parse(response.element);
+
+    let responseObj: Object;
+
     switch (element.status) {
       case 'ok':
-        return {
-          'response': element.prediclion,
-          'time': element.time,
+        responseObj = {
+          response: element.prediclion,
+          time: element.time,
           status: HttpStatus.OK,
-        }
+        };
+        break;
 
       case 'error':
-        return {
-          'error': element.error,
-          'time': element.time,
+        responseObj = {
+          error: element.error,
+          time: element.time,
           status: HttpStatus.BAD_REQUEST,
-        }
-      
+        };
+        break;
+
       case 'internal_error':
-        return {
-          'error': 'internal error',
+        responseObj = {
+          error: 'internal error',
           status: HttpStatus.INTERNAL_SERVER_ERROR,
-        }
-    
+        };
+        break;
+
       default:
-        throw InternalServerErrorException
+        throw InternalServerErrorException;
     }
+
+    return responseObj;
   }
 
   @Post('start/:modelId')

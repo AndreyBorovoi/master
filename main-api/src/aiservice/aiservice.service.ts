@@ -95,9 +95,12 @@ export class AiserviceService {
     });
     console.log(`requests-${modelId}`, `request-${requestId}-${modelId}`);
 
-    
-    this.redisService.addToList(`requests-${modelId}`, requestId)
-    this.redisService.addToList(`request-${requestId}-${modelId}`, JSON.stringify(data))
+    this.redisService.addToList(`requests-${modelId}`, requestId);
+    this.redisService.addToList(
+      `request-${requestId}-${modelId}`,
+      JSON.stringify(data),
+    );
+
     return this.redisService.popFromList(`response-${requestId}-${modelId}`);
   }
 
