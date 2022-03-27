@@ -76,8 +76,8 @@ while(True):
 	delta = time.time() - start_time
 
 	if error:
-		responce = {'status': 'error', 'time': f'{delta} seconds', 'error': error}
+		responce = {'status': 'error', 'time': delta, 'error': error}
 	else:
-		responce = {'status': 'ok', 'time': f'{delta} seconds', 'prediclion': predict.tolist()}
+		responce = {'status': 'ok', 'time': delta, 'prediction': predict.tolist()}
 
 	redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))

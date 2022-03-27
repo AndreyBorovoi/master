@@ -1,16 +1,27 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { AIService, AIServiceDocument } from '../schemas/aiservice.schema';
 import { User, UserDocument } from '../schemas/user.schema';
+import {
+  UserResponse,
+  UserResponseDocument,
+} from '../schemas/userResponse.shema';
 
 import { RedisService } from '../redis/redis.service';
 
 import * as randomstring from 'randomstring';
 
 import { K8sApi } from './K8sApi';
+
+import { ResponseFromService, ResponseToClient } from './types';
 
 @Injectable()
 export class AiserviceService {
@@ -20,6 +31,8 @@ export class AiserviceService {
     @InjectModel(AIService.name)
     private aiServiceModel: Model<AIServiceDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(UserResponse.name)
+    private userResponseModel: Model<UserResponseDocument>,
     private redisService: RedisService,
   ) {
     this.k8sApi = new K8sApi();
@@ -54,13 +67,11 @@ export class AiserviceService {
 
     await aiservice.save();
 
-    const { deployment } = await this.k8sApi.createAIService(
-      modelId,
-    );
+    const { deployment } = await this.k8sApi.createAIService(modelId);
 
     return {
       modelId: aiservice.modelId,
-      deployment
+      deployment,
     };
   }
 
@@ -82,15 +93,69 @@ export class AiserviceService {
       length: 10,
       charset: 'alphabetic',
     });
+    
     console.log(`requests-${modelId}`, `request-${requestId}-${modelId}`);
 
-    this.redisService.addToList(`requests-${modelId}`, requestId);
-    this.redisService.addToList(
+    await this.redisService.addToList(`requests-${modelId}`, requestId);
+    await this.redisService.addToList(
       `request-${requestId}-${modelId}`,
       JSON.stringify(data),
     );
 
-    return this.redisService.popFromList(`response-${requestId}-${modelId}`);
+    let responseFromService = await this.redisService.popFromList(
+      `response-${requestId}-${modelId}`,
+      2,
+    );
+
+    let element: ResponseFromService;
+
+    if (responseFromService === null) {
+      element = { status: 'internal_error' };
+    } else {
+      element = JSON.parse(responseFromService.element);
+    }
+
+    let clientResponce: ResponseToClient;
+
+    switch (element.status) {
+      case 'ok':
+        clientResponce = {
+          data,
+          response: element.prediction,
+          time: element.time,
+          status: HttpStatus.OK,
+        };
+        break;
+
+      case 'error':
+        clientResponce = {
+          data,
+          error: element.error,
+          time: element.time,
+          status: HttpStatus.BAD_REQUEST,
+        };
+        break;
+
+      case 'internal_error':
+        clientResponce = {
+          data,
+          error: 'internal error',
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        };
+        break;
+
+      default:
+        throw InternalServerErrorException;
+    }
+
+    const userResponse = new this.userResponseModel({
+      modelId,
+      ...clientResponce,
+    });
+
+    userResponse.save();
+
+    return clientResponce;
   }
 
   async start(modelId: string, token: string) {}

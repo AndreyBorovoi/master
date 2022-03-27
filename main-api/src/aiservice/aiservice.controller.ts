@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpStatus,
-  InternalServerErrorException,
   Param,
   Post,
   UploadedFile,
@@ -17,8 +16,6 @@ import {
   RequestDto,
 } from './dto/aisecvice.dto';
 import { AiserviceService } from './aiservice.service';
-
-import { ResponseFromService } from './types';
 
 @Controller('aiservice')
 export class AiserviceController {
@@ -64,39 +61,7 @@ export class AiserviceController {
   ) {
     const response = await this.aiserviceService.request(modelId, data);
 
-    const element: ResponseFromService = JSON.parse(response.element);
-
-    let responseObj: Object;
-
-    switch (element.status) {
-      case 'ok':
-        responseObj = {
-          response: element.prediclion,
-          time: element.time,
-          status: HttpStatus.OK,
-        };
-        break;
-
-      case 'error':
-        responseObj = {
-          error: element.error,
-          time: element.time,
-          status: HttpStatus.BAD_REQUEST,
-        };
-        break;
-
-      case 'internal_error':
-        responseObj = {
-          error: 'internal error',
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-        };
-        break;
-
-      default:
-        throw InternalServerErrorException;
-    }
-
-    return { data, ...responseObj };
+    return response;
   }
 
   @Post('start/:modelId')

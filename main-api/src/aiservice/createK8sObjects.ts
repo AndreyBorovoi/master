@@ -26,9 +26,7 @@ export const createPyDeployment = (modelId: string) => {
               image: '87625155/python-server',
               command: ['python'],
               args: ['server.py'],
-              env: [
-                { name: 'MODELID', value: `${modelId}` },
-              ],
+              env: [{ name: 'MODELID', value: `${modelId}` }],
             },
           ],
         },

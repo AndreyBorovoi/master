@@ -24,7 +24,7 @@ export class RedisService {
     return this.client.LPUSH(name, data);
   }
 
-  async popFromList(name: string) {
-    return this.client.BRPOP(name, 0);
+  async popFromList(name: string, timeout: number = 0) {
+    return this.client.BRPOP(name, timeout);
   }
 }
