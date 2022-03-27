@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-api-service
+spec:
+  type: LoadBalancer
+  selector:
+    project: main-api
+  ports:
+    - protocol  : TCP
+      port      : 80
+      targetPort: 3000
+---
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: main-api-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      project: main-api
+  template:
+    metadata:
+      labels:
+        project: main-api
+    spec:
+      containers:
+        - name : main-api-pod
+          image: 87625155/main-api
+          ports:
+            - containerPort: 3000   # Port on Pod
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol  : TCP
+  selector:
+    app: redis
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-statefull-set
+spec:
+  serviceName: redis
+  selector: 
+    matchLabels:
+      app: redis # has to match .spec.template.metadata.labels
+  replicas: 1 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: redis # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.2.6-alpine
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

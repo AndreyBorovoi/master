@@ -11,6 +11,8 @@ minikube service py-server
 
 minikube tunnel
 
+kubectl apply -f k8s.yaml
+
 minikube ssh
 curl 10.100.140.59:5000
 
