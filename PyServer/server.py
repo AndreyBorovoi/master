@@ -8,7 +8,7 @@ import time
 if 'MODELID' in os.environ.keys():
 	modelId = os.environ['MODELID']
 else:
-	modelId = 'vxgjdqwtip'
+	modelId = 'mlxvcpfuom'
 
 if 'MONGODB' in os.environ.keys():
 	connectionString = os.environ['MONGODB']
@@ -25,59 +25,72 @@ if 'REDIS_PORT' in os.environ.keys():
 else:
 	redisPort = '6379'
 
-mongo = MongoClient(connectionString)
-mainApiDB = mongo['MainApi']
-aiservicesCollection = mainApiDB['aiservices']
-service = aiservicesCollection.find_one({'modelId': modelId})
+def main():
+	while(True):
+		error = ''
+		print(f'requests-{modelId}')
+		request_id_byte = redisClient.blpop(f'requests-{modelId}', 0)[1]
 
+		start_time = time.time()
 
-if os.path.isfile('model'): 
-	os.remove('model')
+		request_id = request_id_byte.decode('utf-8')
+		print(request_id)
 
-with open('model', 'wb') as f:
-	f.write(service['model'])
+		try:
+			data_byte = redisClient.blpop(f'request-{request_id}-{modelId}', 2)[1]
+		except Exception as e:
+			responce = {'status': 'internal_error', 'error': 'data from redis is null'}
+			redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))
+			continue
 
-model = pickle.load(open('model', 'rb'))
+		data_str = data_byte.decode('utf-8')
+		data = json.loads(data_str)
+		print(data)
 
-if os.path.isfile('model'): 
-	os.remove('model')
+		try:
+			predict = model.predict(data)
+			print(predict)
+		except Exception as e:
+			error = e.__str__()
+
+		delta = time.time() - start_time
+
+		if error:
+			responce = {'status': 'error', 'time': delta, 'error': error}
+		else:
+			responce = {'status': 'ok', 'time': delta, 'prediction': predict.tolist()}
+
+		redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))
+
 
 redisClient = redis.Redis(redisUrl, redisPort)
 
-print('ready')
+try:
+	mongo = MongoClient(connectionString)
+	mainApiDB = mongo['MainApi']
+	aiservicesCollection = mainApiDB['aiservices']
+	service = aiservicesCollection.find_one({'modelId': modelId})
+
+	if os.path.isfile('model'): 
+		os.remove('model')
+
+	with open('model', 'wb') as f:
+		f.write(service['model'])
+
+	model = pickle.load(open('model', 'rb'))
+
+	if os.path.isfile('model'): 
+		os.remove('model')
+	
+	print('ready')
+except Exception as e:
+		error = e.__str__()
+		redisClient.rpush('errors', f'{modelId} - {error} in model loading')
+		raise Exception
 
 while(True):
-	error = ''
-	print(f'requests-{modelId}')
-	request_id_byte = redisClient.blpop(f'requests-{modelId}', 0)[1]
-
-	start_time = time.time()
-
-	request_id = request_id_byte.decode('utf-8')
-	print(request_id)
-
 	try:
-		data_byte = redisClient.blpop(f'request-{request_id}-{modelId}', 2)[1]
-	except Exception as e:
-		responce = {'status': 'internal_error', 'error': 'data from redis is null'}
-		redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))
-		continue
-
-	data_str = data_byte.decode('utf-8')
-	data = json.loads(data_str)
-	print(data)
-
-	try:
-		predict = model.predict(data)
-		print(predict)
+		main()
 	except Exception as e:
 		error = e.__str__()
-
-	delta = time.time() - start_time
-
-	if error:
-		responce = {'status': 'error', 'time': delta, 'error': error}
-	else:
-		responce = {'status': 'ok', 'time': delta, 'prediction': predict.tolist()}
-
-	redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))
+		redisClient.rpush('errors', f'{modelId} - {error} in execution')
