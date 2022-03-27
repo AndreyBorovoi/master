@@ -9,6 +9,7 @@ import {
 import { AiserviceController } from './aiservice.controller';
 import { AiserviceService } from './aiservice.service';
 import { RedisModule } from '../redis/redis.module';
+import { K8sApiModule } from '../k8s-api/k8s-api.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RedisModule } from '../redis/redis.module';
       { name: UserResponse.name, schema: UserResponseSchema },
     ]),
     RedisModule,
+    K8sApiModule,
   ],
   controllers: [AiserviceController],
   providers: [AiserviceService],

@@ -16,17 +16,14 @@ import {
 } from '../schemas/userResponse.shema';
 
 import { RedisService } from '../redis/redis.service';
+import { K8sApiService } from '../k8s-api/k8s-api.service';
 
 import * as randomstring from 'randomstring';
-
-import { K8sApi } from './K8sApi';
 
 import { ResponseFromService, ResponseToClient } from './types';
 
 @Injectable()
 export class AiserviceService {
-  k8sApi: K8sApi;
-
   constructor(
     @InjectModel(AIService.name)
     private aiServiceModel: Model<AIServiceDocument>,
@@ -34,9 +31,8 @@ export class AiserviceService {
     @InjectModel(UserResponse.name)
     private userResponseModel: Model<UserResponseDocument>,
     private redisService: RedisService,
-  ) {
-    this.k8sApi = new K8sApi();
-  }
+    private k8sApiService: K8sApiService,
+  ) {}
 
   async test() {}
 
@@ -67,7 +63,7 @@ export class AiserviceService {
 
     await aiservice.save();
 
-    const { deployment } = await this.k8sApi.createAIService(modelId);
+    const { deployment } = await this.k8sApiService.createAIService(modelId);
 
     return {
       modelId: aiservice.modelId,
@@ -93,7 +89,7 @@ export class AiserviceService {
       length: 10,
       charset: 'alphabetic',
     });
-    
+
     console.log(`requests-${modelId}`, `request-${requestId}-${modelId}`);
 
     await this.redisService.addToList(`requests-${modelId}`, requestId);

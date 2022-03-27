@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
 import { createPyDeployment } from './createK8sObjects';
 
-export class K8sApi {
+@Injectable()
+export class K8sApiService {
   private k8sApi: k8s.CoreV1Api;
   private k8sApiApps: k8s.AppsV1Api;
   private k8sApiNode: k8s.NodeV1Api;
