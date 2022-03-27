@@ -18,9 +18,6 @@ export class AIService {
 
   @Prop()
   description: string;
-
-  @Prop({ required: true, unique: true })
-  port: number;
 }
 
 export const AIServiceSchema = SchemaFactory.createForClass(AIService);

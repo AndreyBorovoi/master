@@ -1,5 +1,5 @@
 import * as k8s from '@kubernetes/client-node';
-import { createPyDeployment, createPyService } from './createK8sObjects';
+import { createPyDeployment } from './createK8sObjects';
 
 export class K8sApi {
   private k8sApi: k8s.CoreV1Api;
@@ -16,17 +16,17 @@ export class K8sApi {
     this.k8sApiNode = this.kc.makeApiClient(k8s.NodeV1Api);
   }
 
-  async createAIService(modelId: string, port: number) {
-    const deployment = await this.createDeployment(modelId, port);
-    const service = await this.creteService(modelId, port);
-    return { deployment, service };
+  async createAIService(modelId: string) {
+    const deployment = await this.createDeployment(modelId);
+    // const service = await this.creteService(modelId, port);
+    return { deployment };
   }
 
-  private async createDeployment(modelId: string, port: number) {
+  private async createDeployment(modelId: string) {
     const deployment = this.k8sApiApps
       .createNamespacedDeployment(
         'default',
-        createPyDeployment(modelId, port),
+        createPyDeployment(modelId),
         'true',
       )
       .then((value) => {
@@ -38,19 +38,19 @@ export class K8sApi {
     return deployment;
   }
 
-  private async creteService(modelId: string, port: number) {
-    const service = this.k8sApi
-      .createNamespacedService(
-        'default',
-        createPyService(modelId, port),
-        'true',
-      )
-      .then((value) => {
-        return value.body;
-      })
-      .catch((error) => {
-        return error;
-      });
-    return service;
-  }
+  // private async creteService(modelId: string, port: number) {
+  //   const service = this.k8sApi
+  //     .createNamespacedService(
+  //       'default',
+  //       createPyService(modelId, port),
+  //       'true',
+  //     )
+  //     .then((value) => {
+  //       return value.body;
+  //     })
+  //     .catch((error) => {
+  //       return error;
+  //     });
+  //   return service;
+  // }
 }

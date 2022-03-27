@@ -9,14 +9,8 @@ import { User, UserDocument } from '../schemas/user.schema';
 import { RedisService } from '../redis/redis.service';
 
 import * as randomstring from 'randomstring';
-import * as fetch from 'node-fetch';
 
 import { K8sApi } from './K8sApi';
-
-function randomPort() {
-  let rand = 1 + Math.random() * 65535;
-  return Math.round(rand);
-}
 
 @Injectable()
 export class AiserviceService {
@@ -50,28 +44,23 @@ export class AiserviceService {
     const user = await this.getUserByToken(token);
     this.checkUser(user);
     const modelId = await this.generateModelId();
-    const port = randomPort();
 
     const aiservice = new this.aiServiceModel({
       owner: user,
       model: model,
       modelId,
       description: description || '',
-      port,
     });
 
     await aiservice.save();
 
-    const { deployment, service } = await this.k8sApi.createAIService(
+    const { deployment } = await this.k8sApi.createAIService(
       modelId,
-      port,
     );
 
     return {
       modelId: aiservice.modelId,
-      port,
-      deployment,
-      service,
+      deployment
     };
   }
 

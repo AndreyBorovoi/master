@@ -96,7 +96,7 @@ export class AiserviceController {
         throw InternalServerErrorException;
     }
 
-    return responseObj;
+    return { data, ...responseObj };
   }
 
   @Post('start/:modelId')
