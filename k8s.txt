@@ -1,5 +1,8 @@
 minikube start --driver=virtualbox --no-vtx-check
+kubectl apply -f k8s.yaml
+kubectl create clusterrolebinding serviceaccounts-cluster-admin --clusterrole=cluster-admin --group=system:serviceaccounts
 minikube dashboard
+minikube tunnel
 
 kubectl create deployment main-server --image=87625155/master-poc-node
 kubectl expose deployment main-server --type=LoadBalancer --port=8000
@@ -9,11 +12,9 @@ kubectl create deployment py-server --image=87625155/master-poc-py
 kubectl expose deployment py-server --type=LoadBalancer --port=5000
 minikube service py-server
 
-minikube tunnel
-
-kubectl apply -f k8s.yaml
-
 minikube ssh
 curl 10.100.140.59:5000
 
 minikube stop
+
+printenv

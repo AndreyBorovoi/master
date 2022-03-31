@@ -1,5 +1,9 @@
 FROM node:16-alpine
 
+ARG MONGODB
+
+ENV MONGODB ${MONGODB}
+
 COPY . .
 
 RUN npm ci

@@ -14,7 +14,7 @@ export class UserResponse {
   data: any[];
 
   @Prop({ required: false })
-  response?: string;
+  response?: any[];
 
   @Prop({ required: false })
   time?: number;

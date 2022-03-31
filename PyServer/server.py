@@ -8,7 +8,7 @@ import time
 if 'MODELID' in os.environ.keys():
 	modelId = os.environ['MODELID']
 else:
-	modelId = 'mlxvcpfuom'
+	modelId = 'sinervikby'
 
 if 'MONGODB' in os.environ.keys():
 	connectionString = os.environ['MONGODB']
