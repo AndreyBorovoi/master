@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as k8s from '@kubernetes/client-node';
-import { createPyDeployment } from './createK8sObjects';
+import { createPyDeploymentConfig } from './createK8sObjects';
 
 @Injectable()
 export class K8sApiService {
@@ -20,7 +20,6 @@ export class K8sApiService {
 
   async createAIService(modelId: string) {
     const deployment = await this.createDeployment(modelId);
-    // const service = await this.creteService(modelId, port);
     return { deployment };
   }
 
@@ -28,7 +27,7 @@ export class K8sApiService {
     const deployment = this.k8sApiApps
       .createNamespacedDeployment(
         'default',
-        createPyDeployment(modelId),
+        createPyDeploymentConfig(modelId),
         'true',
       )
       .then((value) => {
@@ -40,19 +39,11 @@ export class K8sApiService {
     return deployment;
   }
 
-  // private async creteService(modelId: string, port: number) {
-  //   const service = this.k8sApi
-  //     .createNamespacedService(
-  //       'default',
-  //       createPyService(modelId, port),
-  //       'true',
-  //     )
-  //     .then((value) => {
-  //       return value.body;
-  //     })
-  //     .catch((error) => {
-  //       return error;
-  //     });
-  //   return service;
-  // }
+  private async getDeploymentStatus(modelId: string) {
+    return {};
+  }
+
+  private async deleteDeployment(modelId: string) {
+    return {};
+  }
 }

@@ -1,6 +1,6 @@
 import * as k8s from '@kubernetes/client-node';
 
-export const createPyDeployment = (modelId: string) => {
+export const createPyDeploymentConfig = (modelId: string) => {
   const PyDeployment: k8s.V1Deployment = {
     apiVersion: 'apps/v1',
     kind: 'Deployment',
@@ -47,26 +47,3 @@ export const createPyDeployment = (modelId: string) => {
 
   return PyDeployment;
 };
-
-// export const createPyService = (modelId: string, port: number) => {
-//   const PyService: k8s.V1Service = {
-//     apiVersion: 'v1',
-//     kind: 'Service',
-//     metadata: {
-//       name: modelId,
-//     },
-//     spec: {
-//       ports: [
-//         {
-//           name: 'http',
-//           port: port,
-//         },
-//       ],
-//       selector: {
-//         app: modelId,
-//       },
-//       type: 'LoadBalancer',
-//     },
-//   };
-//   return PyService;
-// };

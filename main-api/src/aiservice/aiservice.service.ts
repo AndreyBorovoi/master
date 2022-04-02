@@ -47,26 +47,21 @@ export class AiserviceService {
     return modelId;
   }
 
-  async create(token: string, model: Buffer, user: UserDocument) {
+  async create(model: Buffer, user: UserDocument) {
     const modelId = await this.generateModelId();
-
     const aiservice = new this.aiServiceModel({
       owner: user,
       model: model,
       modelId,
     });
-
     await aiservice.save();
-
-    const { deployment } = await this.k8sApiService.createAIService(modelId);
 
     return {
       modelId: aiservice.modelId,
-      deployment,
     };
   }
 
-  async getAIServices(token: string, user: UserDocument) {
+  async getAIServices(user: UserDocument) {
     const services = await this.aiServiceModel.find({ owner: user }).exec();
     return services.map((service: AIService) => {
       return {
@@ -146,13 +141,28 @@ export class AiserviceService {
     return clientResponce;
   }
 
-  async start(modelId: string, token: string) {}
+  async start(modelId: string, user: UserDocument) {
+    const { deployment } = await this.k8sApiService.createAIService(modelId);
+    return { deployment };
+  }
 
-  async stop(modelId: string, token: string) {}
+  async stop(modelId: string, user: UserDocument) {
+    return {};
+  }
 
-  async delete(modelId: string, token: string) {}
+  async delete(modelId: string, user: UserDocument) {
+    return {};
+  }
+
+  async status(modelId: string, user: UserDocument) {
+    return {};
+  }
 
   private async getAIServiceByModelId(modelId: string) {
     return await this.aiServiceModel.findOne({ modelId: modelId });
+  }
+
+  private async isOwner(modelId: string, user: UserDocument) {
+    return {};
   }
 }

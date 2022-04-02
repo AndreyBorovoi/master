@@ -40,7 +40,7 @@ export class AiserviceController {
       throw new BadRequestException({ text: 'add model' });
     }
 
-    const modelData = await this.aiserviceService.create(token, model.buffer, user);
+    const modelData = await this.aiserviceService.create(model.buffer, user);
     return { ...modelData, status: HttpStatus.CREATED };
   }
 
@@ -50,7 +50,7 @@ export class AiserviceController {
     @Param('token') token: string,
     @Req() { user }: RequestWithUser,
   ) {
-    const services = await this.aiserviceService.getAIServices(token, user);
+    const services = await this.aiserviceService.getAIServices(user);
     return { services, status: HttpStatus.OK };
   }
 
@@ -70,7 +70,10 @@ export class AiserviceController {
     @Param('modelId') modelId: string,
     @Param('token') token: string,
     @Req() { user }: RequestWithUser,
-  ) {}
+  ) {
+    const modelData = await this.aiserviceService.start(modelId, user);
+    return { ...modelData, status: HttpStatus.ACCEPTED };
+  }
 
   @Post('stop/:modelId/:token')
   @UseGuards(TokenAuthorizationGuard)
@@ -78,7 +81,10 @@ export class AiserviceController {
     @Param('modelId') modelId: string,
     @Param('token') token: string,
     @Req() { user }: RequestWithUser,
-  ) {}
+  ) {
+    const modelData = await this.aiserviceService.stop(modelId, user);
+    return { ...modelData, status: HttpStatus.ACCEPTED };
+  }
 
   @Post('delete/:modelId/:token')
   @UseGuards(TokenAuthorizationGuard)
@@ -86,5 +92,19 @@ export class AiserviceController {
     @Param('modelId') modelId: string,
     @Param('token') token: string,
     @Req() { user }: RequestWithUser,
-  ) {}
+  ) {
+    const modelData = await this.aiserviceService.delete(modelId, user);
+    return { ...modelData, status: HttpStatus.ACCEPTED };
+  }
+
+  @Get('status/:modelId/:token')
+  @UseGuards(TokenAuthorizationGuard)
+  async status(
+    @Param('modelId') modelId: string,
+    @Param('token') token: string,
+    @Req() { user }: RequestWithUser,
+  ) {
+    const modelData = await this.aiserviceService.status(modelId, user);
+    return { ...modelData, status: HttpStatus.OK };
+  }
 }
