@@ -39,11 +39,13 @@ export class K8sApiService {
     return deployment;
   }
 
-  private async getDeploymentStatus(modelId: string) {
-    return {};
+  async getDeploymentStatus(modelId: string) {
+    const response = await this.k8sApiApps.readNamespacedDeploymentStatus(modelId, 'default', 'true')
+    return response;
   }
 
-  private async deleteDeployment(modelId: string) {
-    return {};
+  async deleteDeployment(modelId: string) {
+    const response = await this.k8sApiApps.deleteNamespacedDeployment(modelId, 'default')
+    return response;
   }
 }

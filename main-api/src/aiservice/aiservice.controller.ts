@@ -15,9 +15,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 import { RequestDto } from './dto/aisecvice.dto';
 import { AiserviceService } from './aiservice.service';
-import { TokenAuthorizationGuard } from 'src/token-authorization.guard';
+import { TokenGuard } from 'src/token.guard';
+import { TokenWithModelIDGuard } from 'src/token-with-model-id.guard';
 
-import { RequestWithUser } from './types';
+import { RequestWithUser, RequestWithUserAndService } from './types';
 
 @Controller('aiservice')
 export class AiserviceController {
@@ -30,9 +31,8 @@ export class AiserviceController {
 
   @Post('create/:token')
   @UseInterceptors(FileInterceptor('model'))
-  @UseGuards(TokenAuthorizationGuard)
+  @UseGuards(TokenGuard)
   async create(
-    @Param('token') token: string,
     @UploadedFile() model: Express.Multer.File,
     @Req() { user }: RequestWithUser,
   ) {
@@ -40,14 +40,13 @@ export class AiserviceController {
       throw new BadRequestException({ text: 'add model' });
     }
 
-    const modelData = await this.aiserviceService.create(model.buffer, user);
-    return { ...modelData, status: HttpStatus.CREATED };
+    const serviceData = await this.aiserviceService.create(model.buffer, user);
+    return { ...serviceData, status: HttpStatus.CREATED };
   }
 
   @Get('get_services/:token')
-  @UseGuards(TokenAuthorizationGuard)
+  @UseGuards(TokenGuard)
   async getServices(
-    @Param('token') token: string,
     @Req() { user }: RequestWithUser,
   ) {
     const services = await this.aiserviceService.getAIServices(user);
@@ -65,46 +64,38 @@ export class AiserviceController {
   }
 
   @Post('start/:modelId/:token')
-  @UseGuards(TokenAuthorizationGuard)
+  @UseGuards(TokenWithModelIDGuard)
   async start(
-    @Param('modelId') modelId: string,
-    @Param('token') token: string,
-    @Req() { user }: RequestWithUser,
+    @Req() { user, service }: RequestWithUserAndService,
   ) {
-    const modelData = await this.aiserviceService.start(modelId, user);
-    return { ...modelData, status: HttpStatus.ACCEPTED };
+    const serviceData = await this.aiserviceService.start(service, user);
+    return { ...serviceData, status: HttpStatus.ACCEPTED };
   }
 
   @Post('stop/:modelId/:token')
-  @UseGuards(TokenAuthorizationGuard)
+  @UseGuards(TokenWithModelIDGuard)
   async stop(
-    @Param('modelId') modelId: string,
-    @Param('token') token: string,
-    @Req() { user }: RequestWithUser,
+    @Req() { user, service }: RequestWithUserAndService,
   ) {
-    const modelData = await this.aiserviceService.stop(modelId, user);
-    return { ...modelData, status: HttpStatus.ACCEPTED };
+    const serviceData = await this.aiserviceService.stop(service, user);
+    return { ...serviceData, status: HttpStatus.ACCEPTED };
   }
 
   @Post('delete/:modelId/:token')
-  @UseGuards(TokenAuthorizationGuard)
+  @UseGuards(TokenWithModelIDGuard)
   async delete(
-    @Param('modelId') modelId: string,
-    @Param('token') token: string,
-    @Req() { user }: RequestWithUser,
+    @Req() { user, service }: RequestWithUserAndService,
   ) {
-    const modelData = await this.aiserviceService.delete(modelId, user);
-    return { ...modelData, status: HttpStatus.ACCEPTED };
+    const response = await this.aiserviceService.delete(service, user);
+    return { ...response, status: HttpStatus.ACCEPTED };
   }
 
   @Get('status/:modelId/:token')
-  @UseGuards(TokenAuthorizationGuard)
+  @UseGuards(TokenWithModelIDGuard)
   async status(
-    @Param('modelId') modelId: string,
-    @Param('token') token: string,
-    @Req() { user }: RequestWithUser,
+    @Req() { user, service }: RequestWithUserAndService,
   ) {
-    const modelData = await this.aiserviceService.status(modelId, user);
-    return { ...modelData, status: HttpStatus.OK };
+    await this.aiserviceService.status(service, user);
+    return { status: HttpStatus.OK };
   }
 }

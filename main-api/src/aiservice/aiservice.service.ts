@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { AIService, AIServiceDocument } from '../schemas/aiservice.schema';
-import { User, UserDocument } from '../schemas/user.schema';
+import { UserDocument } from '../schemas/user.schema';
 import {
   UserResponse,
   UserResponseDocument,
@@ -141,28 +141,26 @@ export class AiserviceService {
     return clientResponce;
   }
 
-  async start(modelId: string, user: UserDocument) {
-    const { deployment } = await this.k8sApiService.createAIService(modelId);
+  async start(service: AIServiceDocument, user: UserDocument) {
+    const { deployment } = await this.k8sApiService.createAIService(service.modelId);
     return { deployment };
   }
 
-  async stop(modelId: string, user: UserDocument) {
-    return {};
+  async stop(service: AIServiceDocument, user: UserDocument) {
+    const response = await this.k8sApiService.deleteDeployment(service.modelId);
+    return response;
   }
 
-  async delete(modelId: string, user: UserDocument) {
-    return {};
+  async delete(service: AIServiceDocument, user: UserDocument) {
+    return await service.deleteOne();
   }
 
-  async status(modelId: string, user: UserDocument) {
-    return {};
+  async status(service: AIServiceDocument, user: UserDocument) {
+    const response = await this.k8sApiService.getDeploymentStatus(service.modelId);
+    return response;
   }
 
-  private async getAIServiceByModelId(modelId: string) {
+  async getAIServiceByModelId(modelId: string) {
     return await this.aiServiceModel.findOne({ modelId: modelId });
-  }
-
-  private async isOwner(modelId: string, user: UserDocument) {
-    return {};
   }
 }

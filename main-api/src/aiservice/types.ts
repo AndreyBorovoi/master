@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Request } from 'express';
 import { UserDocument } from '../schemas/user.schema';
+import { AIServiceDocument } from '../schemas/aiservice.schema';
 
 export type ResponseFromService = {
   prediction?: any[];
@@ -18,3 +19,4 @@ export type ResponseToClient = {
 };
 
 export type RequestWithUser = Request & { user: UserDocument };
+export type RequestWithUserAndService = Request & { user: UserDocument, service: AIServiceDocument};
