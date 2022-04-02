@@ -7,15 +7,17 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  BadRequestException,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-import {
-  PermissionsDto,
-  CreateServiceDto,
-  RequestDto,
-} from './dto/aisecvice.dto';
+import { RequestDto } from './dto/aisecvice.dto';
 import { AiserviceService } from './aiservice.service';
+import { TokenAuthorizationGuard } from 'src/token-authorization.guard';
+
+import { RequestWithUser } from './types';
 
 @Controller('aiservice')
 export class AiserviceController {
@@ -26,31 +28,29 @@ export class AiserviceController {
     return this.aiserviceService.test();
   }
 
-  @Post('create')
+  @Post('create/:token')
   @UseInterceptors(FileInterceptor('model'))
+  @UseGuards(TokenAuthorizationGuard)
   async create(
-    @Body() { token, description }: CreateServiceDto,
+    @Param('token') token: string,
     @UploadedFile() model: Express.Multer.File,
+    @Req() { user }: RequestWithUser,
   ) {
     if (!model) {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'add model',
-        error: 'Bad Request',
-      };
+      throw new BadRequestException({ text: 'add model' });
     }
 
-    const modelData = await this.aiserviceService.create(
-      token,
-      model.buffer,
-      description,
-    );
+    const modelData = await this.aiserviceService.create(token, model.buffer, user);
     return { ...modelData, status: HttpStatus.CREATED };
   }
 
-  @Get('get_services')
-  async getServices(@Body() { token }: PermissionsDto) {
-    const services = await this.aiserviceService.getAIServices(token);
+  @Get('get_services/:token')
+  @UseGuards(TokenAuthorizationGuard)
+  async getServices(
+    @Param('token') token: string,
+    @Req() { user }: RequestWithUser,
+  ) {
+    const services = await this.aiserviceService.getAIServices(token, user);
     return { services, status: HttpStatus.OK };
   }
 
@@ -64,21 +64,27 @@ export class AiserviceController {
     return response;
   }
 
-  @Post('start/:modelId')
+  @Post('start/:modelId/:token')
+  @UseGuards(TokenAuthorizationGuard)
   async start(
     @Param('modelId') modelId: string,
-    @Body() { token }: PermissionsDto,
+    @Param('token') token: string,
+    @Req() { user }: RequestWithUser,
   ) {}
 
-  @Post('stop/:modelId')
+  @Post('stop/:modelId/:token')
+  @UseGuards(TokenAuthorizationGuard)
   async stop(
     @Param('modelId') modelId: string,
-    @Body() { token }: PermissionsDto,
+    @Param('token') token: string,
+    @Req() { user }: RequestWithUser,
   ) {}
 
-  @Post('delete/:modelId')
+  @Post('delete/:modelId/:token')
+  @UseGuards(TokenAuthorizationGuard)
   async delete(
     @Param('modelId') modelId: string,
-    @Body() { token }: PermissionsDto,
+    @Param('token') token: string,
+    @Req() { user }: RequestWithUser,
   ) {}
 }

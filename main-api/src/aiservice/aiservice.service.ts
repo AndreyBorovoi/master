@@ -1,5 +1,4 @@
 import {
-  HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -27,7 +26,6 @@ export class AiserviceService {
   constructor(
     @InjectModel(AIService.name)
     private aiServiceModel: Model<AIServiceDocument>,
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(UserResponse.name)
     private userResponseModel: Model<UserResponseDocument>,
     private redisService: RedisService,
@@ -49,16 +47,13 @@ export class AiserviceService {
     return modelId;
   }
 
-  async create(token: string, model: Buffer, description?: string) {
-    const user = await this.getUserByToken(token);
-    this.checkUser(user);
+  async create(token: string, model: Buffer, user: UserDocument) {
     const modelId = await this.generateModelId();
 
     const aiservice = new this.aiServiceModel({
       owner: user,
       model: model,
       modelId,
-      description: description || '',
     });
 
     await aiservice.save();
@@ -71,14 +66,11 @@ export class AiserviceService {
     };
   }
 
-  async getAIServices(token: string) {
-    const user = await this.getUserByToken(token);
-    this.checkUser(user);
+  async getAIServices(token: string, user: UserDocument) {
     const services = await this.aiServiceModel.find({ owner: user }).exec();
     return services.map((service: AIService) => {
       return {
         modelId: service.modelId,
-        description: service.description,
       };
     });
   }
@@ -100,7 +92,7 @@ export class AiserviceService {
 
     let responseFromService = await this.redisService.popFromList(
       `response-${requestId}-${modelId}`,
-      2,
+      10,
     );
 
     let element: ResponseFromService;
@@ -159,17 +151,6 @@ export class AiserviceService {
   async stop(modelId: string, token: string) {}
 
   async delete(modelId: string, token: string) {}
-
-  private checkUser(user?: User) {
-    //TODO: Вынести в guard
-    if (!user) {
-      throw new HttpException({ text: 'Wrong token' }, HttpStatus.UNAUTHORIZED);
-    }
-  }
-
-  private async getUserByToken(token: string) {
-    return await this.userModel.findOne({ token: token });
-  }
 
   private async getAIServiceByModelId(modelId: string) {
     return await this.aiServiceModel.findOne({ modelId: modelId });

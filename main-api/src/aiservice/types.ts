@@ -1,4 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
+import { Request } from 'express';
+import { UserDocument } from '../schemas/user.schema';
 
 export type ResponseFromService = {
   prediction?: any[];
@@ -14,3 +16,5 @@ export type ResponseToClient = {
   time?: number;
   status: HttpStatus;
 };
+
+export type RequestWithUser = Request & { user: UserDocument };

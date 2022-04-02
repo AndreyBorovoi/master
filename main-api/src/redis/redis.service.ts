@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { createClient, RedisClientType } from 'redis';
 
-const redisHost = process.env.REDIS_SERVICE_SERVICE_HOST || 'localhost'
-const redisPort = process.env.REDIS_SERVICE_SERVICE_PORT || '6379'
+const redisHost = process.env.REDIS_SERVICE_SERVICE_HOST || 'localhost';
+const redisPort = process.env.REDIS_SERVICE_SERVICE_PORT || '6379';
 
 @Injectable()
 export class RedisService {
@@ -11,9 +11,9 @@ export class RedisService {
   constructor() {
     console.log(`redis ${redisHost}:${redisPort}`);
     this.client = createClient({
-      url: `redis://${redisHost}:${redisPort}`
+      url: `redis://${redisHost}:${redisPort}`,
     });
-    
+
     this.client.on('error', (err) => console.log('Redis Client Error', err));
 
     this.client.connect();

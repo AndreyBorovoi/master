@@ -1,8 +1,13 @@
 import { Model } from 'mongoose';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import { User, UserDocument } from '../schemas/user.schema';
 import { UserDto } from './dto/user.dto';
 
@@ -10,8 +15,8 @@ import { UserDto } from './dto/user.dto';
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  async createUser(userDto: UserDto): Promise<User> {
-    if (await this.checkUsername(userDto.username)) {
+  async createUser({ username, password }: UserDto): Promise<User> {
+    if (await this.checkUsername(username)) {
       throw new HttpException(
         { text: 'Username already exist' },
         HttpStatus.BAD_REQUEST,
@@ -19,9 +24,9 @@ export class UserService {
     }
 
     const user: User = {
-      username: userDto.username,
-      password: bcrypt.hashSync(userDto.password, 1),
-      token: jwt.sign({ username: userDto.username }, 'secret'),
+      username: username,
+      password: bcrypt.hashSync(password, 1),
+      token: sign({ username: username }, 'secret'),
     };
 
     const newUser = new this.userModel(user);
@@ -30,27 +35,25 @@ export class UserService {
     return newUser;
   }
 
-  async getToken(userDto: UserDto) {
-    if (!(await this.checkUsername(userDto.username))) {
-      throw new HttpException(
-        { text: 'Username do not exist' },
-        HttpStatus.BAD_REQUEST,
-      );
+  async getToken({ username, password }: UserDto) {
+    const user = await this.getUserByName(username);
+
+    if (user === null || !bcrypt.compareSync(password, user.password)) {
+      throw new UnauthorizedException();
     }
 
-    const user = await this.userModel.findOne({ username: userDto.username });
-
-    if (bcrypt.compareSync(userDto.password, user.password)) {
-      return user.token;
-    } else {
-      throw new HttpException(
-        { text: 'Wrong username or password' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return user.token;
   }
 
-  private async checkUsername(username: string) {
-    return Boolean(await this.userModel.findOne({ username }));
+  async getUserByToken(token: string) {
+    return await this.userModel.findOne({ token: token });
+  }
+
+  async getUserByName(username: string) {
+    return await this.userModel.findOne({ username });
+  }
+
+  async checkUsername(username: string) {
+    return Boolean(await this.getUserByName(username));
   }
 }

@@ -15,9 +15,6 @@ export class AIService {
 
   @Prop({ required: true, unique: false })
   model: Buffer;
-
-  @Prop()
-  description: string;
 }
 
 export const AIServiceSchema = SchemaFactory.createForClass(AIService);

@@ -29,8 +29,14 @@ export const createPyDeployment = (modelId: string) => {
               env: [
                 { name: 'MODELID', value: `${modelId}` },
                 { name: 'MONGODB', value: `${process.env.MONGODB}` },
-                { name: 'REDIS_URL', value: `${process.env.REDIS_SERVICE_SERVICE_HOST}` },
-                { name: 'REDIS_PORT', value: `${process.env.REDIS_SERVICE_SERVICE_PORT}` },
+                {
+                  name: 'REDIS_URL',
+                  value: `${process.env.REDIS_SERVICE_SERVICE_HOST}`,
+                },
+                {
+                  name: 'REDIS_PORT',
+                  value: `${process.env.REDIS_SERVICE_SERVICE_PORT}`,
+                },
               ],
             },
           ],

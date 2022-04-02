@@ -6,13 +6,13 @@ import { UserModule } from './user/user.module';
 import { AiserviceModule } from './aiservice/aiservice.module';
 import { RedisModule } from './redis/redis.module';
 
-const mongoConnectionString = process.env.MONGODB || 'mongodb+srv://testuser:testuser@cluster0.og9pt.mongodb.net/MainApi?retryWrites=true&w=majority'
+const mongoConnectionString =
+  process.env.MONGODB ||
+  'mongodb+srv://testuser:testuser@cluster0.og9pt.mongodb.net/MainApi?retryWrites=true&w=majority';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      mongoConnectionString,
-    ),
+    MongooseModule.forRoot(mongoConnectionString),
     UserModule,
     AiserviceModule,
     RedisModule,
