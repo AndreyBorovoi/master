@@ -37,7 +37,7 @@ def main():
 		print(request_id)
 
 		try:
-			data_byte = redisClient.blpop(f'request-{request_id}-{modelId}', 2)[1]
+			data_byte = redisClient.blpop(f'request-{request_id}-{modelId}', 5)[1]
 		except Exception as e:
 			responce = {'status': 'internal_error', 'error': 'data from redis is null'}
 			redisClient.rpush(f'response-{request_id}-{modelId}', json.dumps(responce))

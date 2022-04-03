@@ -87,7 +87,7 @@ export class AiserviceService {
 
     let responseFromService = await this.redisService.popFromList(
       `response-${requestId}-${modelId}`,
-      10,
+      20,
     );
 
     let element: ResponseFromService;

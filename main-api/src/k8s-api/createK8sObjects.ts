@@ -13,6 +13,7 @@ export const createPyDeploymentConfig = (modelId: string) => {
           app: modelId,
         },
       },
+      replicas: 6,
       template: {
         metadata: {
           labels: {
