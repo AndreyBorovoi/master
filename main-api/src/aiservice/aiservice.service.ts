@@ -131,12 +131,11 @@ export class AiserviceService {
         throw InternalServerErrorException;
     }
 
-    const userResponse = new this.userResponseModel({
-      modelId,
-      ...clientResponce,
-    });
-
-    userResponse.save();
+    // const userResponse = new this.userResponseModel({
+    //   modelId,
+    //   ...clientResponce,
+    // });
+    // userResponse.save();
 
     return clientResponce;
   }
