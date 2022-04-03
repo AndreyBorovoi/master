@@ -5,3 +5,7 @@ docker push 87625155/main-api
 docker build -t python-server .
 docker tag python-server 87625155/python-server
 docker push 87625155/python-server
+
+docker pull ubuntu
+apt-get update
+apt install nano

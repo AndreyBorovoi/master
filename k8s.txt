@@ -17,6 +17,7 @@ minikube ssh
 curl 10.100.140.59:5000
 
 minikube stop
+minikube delete
 
 printenv
 
