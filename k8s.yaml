@@ -145,7 +145,6 @@ spec:
         app: redisinsight #label for pod/s
     spec:
       containers:
-
       - name:  redisinsight #Container name (DNS_LABEL, unique)
         image: redislabs/redisinsight:latest #repo/image
         imagePullPolicy: IfNotPresent #Always pull image
@@ -158,3 +157,4 @@ spec:
       volumes:
       - name: db
         emptyDir: {} # node-ephemeral volume https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+
