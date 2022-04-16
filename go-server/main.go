@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -36,17 +37,31 @@ func generateRequestId() string {
 
 func main() {
 	var goContext = context.Background()
-	// gin.SetMode(gin.ReleaseMode)
+	_, existsProdMod := os.LookupEnv("PROD")
+	if existsProdMod {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	redisHost, existsRedisHost := os.LookupEnv("REDIS_SERVICE_SERVICE_HOST")
+	if !existsRedisHost {
+		redisHost = "localhost"
+	}
+	redisPort, existsRedisPort := os.LookupEnv("REDIS_SERVICE_SERVICE_PORT")
+	if !existsRedisPort {
+		redisPort = "6379"
+	}
+
+	
 	rand.Seed(time.Now().UnixNano())
 	server := gin.Default()
 	redis := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     fmt.Sprintf("%v:%v", redisHost, redisPort),
 		Password: "",
 		DB:       0,
 		PoolSize: 1000,
 	})
 
-	server.GET("/:modelId", func(ctx *gin.Context) {
+	fmt.Printf("redis %v:%v", redisHost, redisPort)
+	server.GET("/aiservice/request/:modelId", func(ctx *gin.Context) {
 		start := time.Now()
 		var body requestData
 		ctx.BindJSON(&body)
@@ -106,5 +121,9 @@ func main() {
 		}
 	})
 
-	server.Run("127.0.0.1:3001")
+	if existsProdMod {
+		server.Run(":3000")
+	}else{
+		server.Run("127.0.0.1:3000")
+	}
 }
