@@ -8,7 +8,7 @@ import time
 if 'MODELID' in os.environ.keys():
 	modelId = os.environ['MODELID']
 else:
-	modelId = 'sinervikby'
+	modelId = 'mupjvrsyxz'
 
 if 'MONGODB' in os.environ.keys():
 	connectionString = os.environ['MONGODB']
@@ -93,4 +93,5 @@ while(True):
 		main()
 	except Exception as e:
 		error = e.__str__()
+		print(error)
 		redisClient.rpush('errors', f'{modelId} - {error} in execution')
