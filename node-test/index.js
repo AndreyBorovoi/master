@@ -2,7 +2,7 @@ var request = require('request');
 
 var options = {
   'method': 'GET',
-  'url': 'http://localhost/aiservice/request/oelnkxaqsu',
+  'url': 'http://localhost:3000/aiservice/request/fsgoyghuqr',
   'headers': {
     'Content-Type': 'application/json'
   },
@@ -24,7 +24,7 @@ const getRequest = () =>{
       console.log(error);
     }
     if(response){
-      console.log(JSON.parse(response.body).status);
+      // console.log(JSON.parse(response.body).status);
       if(JSON.parse(response.body).status === 200){
         successful += 1
       }
@@ -38,7 +38,7 @@ const getRequest = () =>{
 }
 
 const interval = 100
-const countPerInterval = 10
+const countPerInterval = 50
 const time = 5000
 
 let intervals = 0
@@ -50,7 +50,7 @@ let unsuccessful = 0
 let timerId = setInterval(() => {
   intervals += 1
   for (let index = 0; index < countPerInterval; index++) {
-    console.log('new request');
+    // console.log('new request');
     getRequest()
   }
 }, interval);

@@ -29,7 +29,7 @@ kind: Service
 metadata:
   name: main-api-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     project: main-api
   ports:
@@ -60,6 +60,40 @@ spec:
             - name: MONGODB
               value: "mongodb+srv://testuser:testuser@cluster0.og9pt.mongodb.net/MainApi?retryWrites=true&w=majority"
 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-server-service
+spec:
+  type: ClusterIP
+  selector:
+    project: go-server
+  ports:
+    - protocol  : TCP
+      port      : 3000
+      targetPort: 3000
+---
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: go-server-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      project: go-server
+  template:
+    metadata:
+      labels:
+        project: go-server
+    spec:
+      containers:
+        - name : go-server-pod
+          image: 87625155/go-server
+          ports:
+            - containerPort: 3000   # Port on Pod
 
 
 ---
@@ -120,7 +154,7 @@ metadata:
                                    # variables `REDISINSIGHT_HOST` and
                                    # `REDISINSIGHT_PORT`
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 8001
       targetPort: 8001
