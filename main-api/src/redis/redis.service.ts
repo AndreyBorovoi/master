@@ -28,10 +28,10 @@ export class RedisService {
   }
 
   async addToList(name: string, data: string) {
-    return this.client.LPUSH(name, data);
+    return this.client.RPUSH(name, data);
   }
 
   async popFromList(name: string, timeout: number = 0) {
-    return this.client.BRPOP(name, timeout);
+    return this.client.BLPOP(name, timeout);
   }
 }

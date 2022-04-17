@@ -68,13 +68,13 @@ func main() {
 		modelId := ctx.Param("modelId")
 		requestId := generateRequestId()
 
-		redis.LPush(
+		redis.RPush(
 			goContext,
 			fmt.Sprintf("requests-%s", modelId),
 			requestId,
 		)
 
-		redis.LPush(
+		redis.RPush(
 			goContext,
 			fmt.Sprintf("request-%s-%s", requestId, modelId),
 			body.ToJSON(),
