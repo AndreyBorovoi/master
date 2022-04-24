@@ -1,6 +1,6 @@
 minikube start --driver=virtualbox --no-vtx-check
 minikube addons enable ingress
-kubectl apply -f k8s.yaml
+kubectl apply -f k8sLocal.yaml
 kubectl create clusterrolebinding serviceaccounts-cluster-admin --clusterrole=cluster-admin --group=system:serviceaccounts
 minikube dashboard
 minikube tunnel
