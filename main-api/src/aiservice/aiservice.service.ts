@@ -141,7 +141,9 @@ export class AiserviceService {
   }
 
   async start(service: AIServiceDocument, user: UserDocument) {
-    const { deployment } = await this.k8sApiService.createAIService(service.modelId);
+    const { deployment } = await this.k8sApiService.createAIService(
+      service.modelId,
+    );
     return { deployment };
   }
 
@@ -155,7 +157,9 @@ export class AiserviceService {
   }
 
   async status(service: AIServiceDocument, user: UserDocument) {
-    const response = await this.k8sApiService.getDeploymentStatus(service.modelId);
+    const response = await this.k8sApiService.getDeploymentStatus(
+      service.modelId,
+    );
     return response;
   }
 

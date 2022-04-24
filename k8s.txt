@@ -5,13 +5,11 @@ kubectl create clusterrolebinding serviceaccounts-cluster-admin --clusterrole=cl
 minikube dashboard
 minikube tunnel
 
-kubectl create deployment main-server --image=87625155/master-poc-node
-kubectl expose deployment main-server --type=LoadBalancer --port=8000
-minikube service main-server
+minikube addons enable metrics-server
 
-kubectl create deployment py-server --image=87625155/master-poc-py
-kubectl expose deployment py-server --type=LoadBalancer --port=5000
-minikube service py-server
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+kubectl top pods
 
 minikube ssh
 curl 10.100.140.59:5000

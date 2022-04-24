@@ -39,7 +39,7 @@ const getRequest = () =>{
 
 const interval = 100
 const countPerInterval = 50
-const time = 5000
+const time = 100000
 
 let intervals = 0
 const responseTime = [];
@@ -49,8 +49,8 @@ let unsuccessful = 0
 
 let timerId = setInterval(() => {
   intervals += 1
+  console.log('new requests');
   for (let index = 0; index < countPerInterval; index++) {
-    // console.log('new request');
     getRequest()
   }
 }, interval);

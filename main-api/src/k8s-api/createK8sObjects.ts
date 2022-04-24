@@ -13,7 +13,6 @@ export const createPyDeploymentConfig = (modelId: string) => {
           app: modelId,
         },
       },
-      replicas: 6,
       template: {
         metadata: {
           labels: {
@@ -47,4 +46,34 @@ export const createPyDeploymentConfig = (modelId: string) => {
   };
 
   return PyDeployment;
+};
+
+export const createHorizontalPodAutoscalerConfig = (deploymetName: string) => {
+  const HorizontalPodAutoscaler: k8s.V2beta1HorizontalPodAutoscaler = {
+    apiVersion: 'autoscaling/v2beta1',
+    kind: 'HorizontalPodAutoscaler',
+    metadata: {
+      name: deploymetName,
+    },
+    spec: {
+      scaleTargetRef: {
+        apiVersion: 'apps/v1',
+        kind: 'Deployment',
+        name: deploymetName,
+      },
+      minReplicas: 2,
+      maxReplicas: 10,
+      metrics: [
+        {
+          type: 'Resource',
+          resource: {
+            name: 'cpu',
+            targetAverageUtilization: 50,
+          },
+        },
+      ],
+    },
+  };
+
+  return HorizontalPodAutoscaler;
 };

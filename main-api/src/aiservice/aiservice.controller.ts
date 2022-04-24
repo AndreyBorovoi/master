@@ -46,9 +46,7 @@ export class AiserviceController {
 
   @Get('get_services/:token')
   @UseGuards(TokenGuard)
-  async getServices(
-    @Req() { user }: RequestWithUser,
-  ) {
+  async getServices(@Req() { user }: RequestWithUser) {
     const services = await this.aiserviceService.getAIServices(user);
     return { services, status: HttpStatus.OK };
   }
@@ -65,36 +63,28 @@ export class AiserviceController {
 
   @Post('start/:modelId/:token')
   @UseGuards(TokenWithModelIDGuard)
-  async start(
-    @Req() { user, service }: RequestWithUserAndService,
-  ) {
+  async start(@Req() { user, service }: RequestWithUserAndService) {
     const serviceData = await this.aiserviceService.start(service, user);
     return { ...serviceData, status: HttpStatus.ACCEPTED };
   }
 
   @Post('stop/:modelId/:token')
   @UseGuards(TokenWithModelIDGuard)
-  async stop(
-    @Req() { user, service }: RequestWithUserAndService,
-  ) {
+  async stop(@Req() { user, service }: RequestWithUserAndService) {
     const serviceData = await this.aiserviceService.stop(service, user);
     return { ...serviceData, status: HttpStatus.ACCEPTED };
   }
 
   @Post('delete/:modelId/:token')
   @UseGuards(TokenWithModelIDGuard)
-  async delete(
-    @Req() { user, service }: RequestWithUserAndService,
-  ) {
+  async delete(@Req() { user, service }: RequestWithUserAndService) {
     const response = await this.aiserviceService.delete(service, user);
     return { ...response, status: HttpStatus.ACCEPTED };
   }
 
   @Get('status/:modelId/:token')
   @UseGuards(TokenWithModelIDGuard)
-  async status(
-    @Req() { user, service }: RequestWithUserAndService,
-  ) {
+  async status(@Req() { user, service }: RequestWithUserAndService) {
     await this.aiserviceService.status(service, user);
     return { status: HttpStatus.OK };
   }

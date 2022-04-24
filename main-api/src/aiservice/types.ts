@@ -19,4 +19,7 @@ export type ResponseToClient = {
 };
 
 export type RequestWithUser = Request & { user: UserDocument };
-export type RequestWithUserAndService = Request & { user: UserDocument, service: AIServiceDocument};
+export type RequestWithUserAndService = Request & {
+  user: UserDocument;
+  service: AIServiceDocument;
+};
